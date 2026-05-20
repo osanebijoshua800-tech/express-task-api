@@ -1,7 +1,9 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
-const PORT = 3000;
+
+// Use Render's dynamic port or default to 3000 locally
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -84,5 +86,5 @@ app.delete('/tasks/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:3000`);
+    console.log(`Server is running on port ${PORT}`);
 });
