@@ -1,33 +1,88 @@
 const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = 3000;
 
-// CRUCIAL: This line tells Express to automatically understand JSON data sent to it
 app.use(express.json());
 
-// Your original GET route
-app.get('/', (req, res) => {
-    res.send('Hello World! Your Express API is working!');
+// Initialize SQLite database connection (creates a 'database.sqlite' file automatically)
+const db = new sqlite3.Database('./database.sqlite', (err) => {
+    if (err) {
+        console.error('Error opening database:', err.message);
+    } else {
+        console.log('Connected to the SQLite database.');
+        // Create tasks table if it doesn't exist yet
+        db.run(`CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            status TEXT NOT NULL
+        )`);
+    }
 });
 
-// Your brand new POST route to handle creating a task
-app.post('/tasks', (req, res) => {
-    // Look inside the incoming request body for the data
-    const taskTitle = req.body.title;
-    const taskStatus = req.body.status;
-
-    console.log(`Received a new task: ${taskTitle}`);
-
-    // Send back a success response with the data we received
-    res.status(201).json({
-        message: "Task created successfully!",
-        data: {
-            title: taskTitle,
-            status: taskStatus
+// 1. GET: Fetch all tasks from the database
+app.get('/tasks', (req, res) => {
+    db.all('SELECT * FROM tasks', [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
         }
+        res.json({ tasks: rows });
+    });
+});
+
+// 2. POST: Create a new task
+app.post('/tasks', (req, res) => {
+    const { title, status } = req.body;
+    if (!title || !status) {
+        return res.status(400).json({ error: 'Please provide both title and status' });
+    }
+
+    db.run('INSERT INTO tasks (title, status) VALUES (?, ?)', [title, status], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({
+            message: 'Task created successfully!',
+            data: { id: this.lastID, title, status }
+        });
+    });
+});
+
+// 3. PUT: Update an existing task by ID
+app.put('/tasks/:id', (req, res) => {
+    const { id } = req.params;
+    const { title, status } = req.body;
+
+    db.run(
+        'UPDATE tasks SET title = ?, status = ? WHERE id = ?',
+        [title, status, id],
+        function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ message: 'Task not found' });
+            }
+            res.json({ message: `Task ${id} updated successfully!`, data: { id, title, status } });
+        }
+    );
+});
+
+// 4. DELETE: Remove a task by ID
+app.delete('/tasks/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.run('DELETE FROM tasks WHERE id = ?', id, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        res.json({ message: `Task ${id} deleted successfully!` });
     });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:3000`);
 });
