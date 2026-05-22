@@ -12,6 +12,10 @@ const JWT_SECRET = 'your_super_secret_jwt_key_123';
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send('Task API is running smoothly on Render!');
+});
+
 // Set database path to /tmp for Render compatibility
 const dbPath = process.env.NODE_ENV === 'production' 
     ? '/tmp/database.sqlite' 
