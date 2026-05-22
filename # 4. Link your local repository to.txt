@@ -1,0 +1,10 @@
+# 4. Link your local repository to GitHub
+git remote add origin https://github.com/osanebijoshua800-tech/express-task
+
+-api
+
+
+
+
+git config --global user.email "osanebijoshua800@gmail.com
+git config --global user.name "Osanebi Joshua"

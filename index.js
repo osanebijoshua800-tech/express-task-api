@@ -1,5 +1,6 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path'); // Node.js built-in path utility
 const app = express();
 
 // Use Render's dynamic port or default to 3000 locally
@@ -7,12 +8,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Initialize SQLite database connection (creates a 'database.sqlite' file automatically)
-const db = new sqlite3.Database('./database.sqlite', (err) => {
+// Set the database path to /tmp/database.sqlite for Render production environment
+// If running locally on Windows, it will fallback safely to a local path
+const dbPath = process.env.NODE_ENV === 'production' 
+    ? '/tmp/database.sqlite' 
+    : path.join(__dirname, 'database.sqlite');
+
+// Initialize SQLite database connection
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log(`Connected to the SQLite database at: ${dbPath}`);
         // Create tasks table if it doesn't exist yet
         db.run(`CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

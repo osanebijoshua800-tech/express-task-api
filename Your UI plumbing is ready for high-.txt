@@ -1,0 +1,23 @@
+Your UI plumbing is ready for high-frequency data, but the "data-flow" is only as strong as the listeners in your Python service and the Socket server.  
+
+  The backend is configured for high interoperability within your agency's stack:
+
+CORS Middleware: Already enabled to allow your Next.js frontend to make cross-origin requests.
+
+Health Checks: Includes a dedicated @app.get("/health") endpoint to ensure the service is running before the frontend attempts to display data.
+
+Your "Bots" page (the FOF/USD engine) is built for Real-Time high-tech transparency:
+
+Technology: It uses Socket.io (io('/api/socket')) to listen for live price updates.
+
+Forecasting: Your Python service uses FB Prophet to generate the "FOF" (Forecast of Future) values.
+
+The Dashboard Verdict: The UI is perfectly structured to handle this data. If the dashboard is currently empty, it is likely because the Socket Server isn't yet receiving the broadcast from the Python Prediction Service.
+
+The Threat: FB Prophet is excellent for seasonality (e.g., "Saturdays are low volume"), but crypto is often driven by "Black Swan" events (Elon tweets, regulatory bans) that historical data can't predict. If the model is wrong too often, users lose trust in the "glass box."
+
+The Fix: * Sentiment Overlay: Integrate a sentiment analysis layer (using news APIs or Warpcast/Twitter scrapers) into your FastAPI service.
+
+The Ingestion Layer (Middleware)
+Instead of running your own node, use a Blockchain Events API (like Alchemy, QuickNode, or Helius).
+
