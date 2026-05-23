@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -5,6 +6,8 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+ 
+app.use(cors());
 
 // Hardcoded secret key for JWT signing (In production, use process.env.JWT_SECRET)
 const JWT_SECRET = 'your_super_secret_jwt_key_123';
